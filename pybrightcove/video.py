@@ -536,12 +536,18 @@ class Video(object):
 
     def save(self, create_multiple_renditions=True,
         preserve_source_rendition=True,
-        encode_to=enums.EncodeToEnum.FLV):
+        encode_to=enums.EncodeToEnum.FLV,
+        batched=False):
         """
         Creates or updates the video
         """
+
         if is_ftp_connection(self.connection) and len(self.assets) > 0:
-            self.connection.post(xml=self.to_xml(), assets=self.assets)
+            
+            if batched:
+                self.connection.add_batched_video(xml=self.to_xml(), assets=self.assets)
+            else:
+                self.connection.post(xml=self.to_xml(), assets=self.assets)
         elif not self.id and self._filename:
             self.id = self.connection.post('create_video', self._filename,
                 create_multiple_renditions=create_multiple_renditions,

@@ -99,6 +99,8 @@ class FTPConnection(Connection):
             report_success=report_success)
         self.notifications = []
         self.callback = None
+        self._queued_xml_partials = []
+        self._queued_assets = []
 
     def get_manifest(self, asset_xml):
         """
@@ -129,6 +131,20 @@ class FTPConnection(Connection):
         ftp.set_pasv(True)
         ftp.storbinary("STOR %s" % os.path.basename(filename),
             file(filename, 'rb'))
+
+    def add_batched_video(self, **kwargs):
+        xml = kwargs.get("xml")
+        assets = kwargs.get("assets")
+        if xml is None or assets is None:
+            raise Exception("Invalid keyword arguments!")
+
+        self._queued_xml_partials.append(xml)
+        self._queued_assets.append(assets)
+
+    def upload_batch(self):
+        queued_xml = ''.join(self._queued_xml_partials)
+        queued_assets = [asset for sublist in self._queued_assets for asset in sublist]
+        self.post(xml=queued_xml, assets=queued_assets)
 
     def post(self, **kwargs):
         xml = kwargs.get("xml")
