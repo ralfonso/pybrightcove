@@ -741,10 +741,12 @@ class Video(object):
         """
         List all videos identified by a list of reference ids
         """
-        if not isinstance(reference_ids, (list, tuple)):
+        try:
+            ids = ','.join(reference_ids)
+        except TypeError, exc:
             err = "Video.find_by_reference_ids expects an iterable argument"
             raise exceptions.PyBrightcoveError(err)
-        ids = ','.join(reference_ids)
+
         return connection.ItemResultSet(
             'find_videos_by_reference_ids', Video, _connection, page_size,
             page_number, sort_by, sort_order, reference_ids=ids)
@@ -755,10 +757,11 @@ class Video(object):
         """
         List all videos identified by a list of Brightcove video ids
         """
-        if not isinstance(ids, (list, tuple)):
+        try:
+            ids = ','.join([str(i) for i in ids])
+        except TypeError, exc:
             err = "Video.find_by_ids expects an iterable argument"
             raise exceptions.PyBrightcoveError(err)
-        ids = ','.join([str(i) for i in ids])
         return connection.ItemResultSet('find_videos_by_ids',
             Video, _connection, page_size, page_number, sort_by, sort_order,
             video_ids=ids)
