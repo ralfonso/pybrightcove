@@ -27,6 +27,7 @@ The ``pybrightcove.video`` module supports all the Brightcove Video APIs.
 import hashlib
 import os
 import time
+from xml.sax.saxutils import quoteattr
 
 from datetime import datetime
 
@@ -351,10 +352,10 @@ class Video(object):
         for asset in self.assets:
             xml += '<asset filename="%s" ' % \
                 os.path.basename(asset['filename'])
-            xml += ' refid="%(refid)s"' % asset
+            xml += ' refid=%s' % quoteattr(asset['refid'])
             xml += ' size="%(size)s"' % asset
-            xml += ' hash-code="%s"' % asset['hash-code']
-            xml += ' type="%(type)s"' % asset
+            xml += ' hash-code=%s' % quoteattr(asset['hash-code'])
+            xml += ' type=%s' % quoteattr(asset['type'])
             if asset.get('encoding-rate', None):
                 xml += ' encoding-rate="%s"' % asset['encoding-rate']
             if asset.get('frame-width', None):
@@ -362,16 +363,16 @@ class Video(object):
             if asset.get('frame-height', None):
                 xml += ' frame-height="%s"' % asset['frame-height']
             if asset.get('display-name', None):
-                xml += ' display-name="%s"' % asset['display-name']
+                xml += ' display-name=%s' % quoteattr(asset['display-name'])
             if asset.get('encode-to', None):
-                xml += ' encode-to="%s"' % asset['encode-to']
+                xml += ' encode-to=%s' % quoteattr(asset['encode-to'])
             if asset.get('encode-multiple', None):
                 xml += ' encode-multiple="%s"' % asset['encode-multiple']
             if asset.get('h264-preserve-as-rendition', None):
                 xml += ' h264-preserve-as-rendition="%s"' % \
                     asset['h264-preserve-as-rendition']
             if asset.get('h264-no-processing', None):
-                xml += ' h264-no-processing="%s"' % asset['h264-no-processing']
+                xml += ' h264-no-processing=%s' % quoteattr(asset['h264-no-processing'])
             xml += ' />\n'
         xml += '<title name="%(name)s" refid="%(referenceId)s" active="TRUE" '
         if self.start_date:
@@ -382,13 +383,13 @@ class Video(object):
             if asset.get('encoding-rate', None) == None:
                 choice = enums.AssetTypeEnum
                 if asset.get('type', None) == choice.VIDEO_FULL:
-                    xml += 'video-full-refid="%s" ' % asset.get('refid')
+                    xml += 'video-full-refid=%s ' % quoteattr(asset.get('refid'))
                 if asset.get('type', None) == choice.THUMBNAIL:
-                    xml += 'thumbnail-refid="%s" ' % asset.get('refid')
+                    xml += 'thumbnail-refid=%s ' % quoteattr(asset.get('refid'))
                 if asset.get('type', None) == choice.VIDEO_STILL:
-                    xml += 'video-still-refid="%s" ' % asset.get('refid')
+                    xml += 'video-still-refid=%s ' % quoteattr(asset.get('refid'))
                 if asset.get('type', None) == choice.FLV_BUMPER:
-                    xml += 'flash-prebumper-refid="%s" ' % asset.get('refid')
+                    xml += 'flash-prebumper-refid=%s ' % quoteattr(asset.get('refid'))
         xml += '>\n'
         if self.short_description:
             xml += '<short-description><![CDATA[%(shortDescription)s]]>'
@@ -403,8 +404,8 @@ class Video(object):
                 xml += '<rendition-refid>%s</rendition-refid>\n' % \
                     asset['refid']
         for meta in self.metadata:
-            xml += '<custom-%s-value name="%s">%s</custom-%s-value>' % \
-                (meta['type'], meta['key'], meta['value'], meta['type'])
+            xml += '<custom-%s-value name=%s>%s</custom-%s-value>' % \
+                (meta['type'], quoteattr(meta['key']), meta['value'], meta['type'])
         xml += '</title>'
         xml = xml % self._to_dict()
         return xml
