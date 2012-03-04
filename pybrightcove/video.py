@@ -374,7 +374,10 @@ class Video(object):
             if asset.get('h264-no-processing', None):
                 xml += ' h264-no-processing=%s' % quoteattr(asset['h264-no-processing'])
             xml += ' />\n'
-        xml += '<title name="%(name)s" refid="%(referenceId)s" active="TRUE" '
+
+        self_dict = self._to_dict()
+        xml += '<title name=%s refid=%s active="TRUE" ' % (quoteattr(self_dict['name']),   
+                                                            quoteattr(self_dict['referenceId']))
         if self.start_date:
             xml += 'start-date="%(start_date)s" '
         if self.end_date:
