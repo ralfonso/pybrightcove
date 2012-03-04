@@ -493,7 +493,7 @@ class Video(object):
     def add_asset(self, filename, asset_type, display_name,
         encoding_rate=None, frame_width=None, frame_height=None,
         encode_to=None, encode_multiple=False,
-        h264_preserve_as_rendition=False, h264_no_processing=False):
+        h264_preserve_as_rendition=False, h264_no_processing=False, refid=None):
         """
         Add an asset to the Video object.
         """
@@ -506,7 +506,9 @@ class Video(object):
         fp.close()
 
         hash_code = m.hexdigest()
-        refid = "%s-%s" % (os.path.basename(filename), hash_code)
+
+        if not refid:
+            refid = "%s-%s" % (os.path.basename(filename), hash_code)
 
         asset = {
             'filename': filename,
@@ -626,14 +628,26 @@ class Video(object):
             delete_shares=delete_shares)
 
     @staticmethod
-    def get_status(video_id, _connection=None):
+    def get_status(video_id=None, reference_id=None, _connection=None):
         """
         Get the status of a video given the ``video_id`` parameter.
         """
+
+        args = {}
+
+        if video_id:
+            args = {'video_id': video_id}
+        elif reference_id:
+            args = {'reference_id': reference_id}
+        else:
+            msg = 'get_status needs either a video_id or a reference_id'
+            raise exceptions.PyBrightcoveError(msg)
+
         c = _connection
         if not c:
             c = connection.APIConnection()
-        return c.post('get_upload_status', video_id=video_id)
+
+        return c.post('get_upload_status', **args)
 
     @staticmethod
     def activate(video_id, _connection=None):
